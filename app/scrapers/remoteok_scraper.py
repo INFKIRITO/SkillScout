@@ -9,15 +9,22 @@ class RemoteOKScraper(jobScraper):
     BASE_URL = "https://remoteok.com/api"
 
     async def fetch_jobs(self, skills: List[str]) -> List[Job]:
-        async with httpx.AsyncClient(timeout=10) as client:
+        headers = {
+            "User-Agent": (
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                "AppleWebKit/537.36 (KHTML, like Gecko) "
+                "Chrome/120.0.0.0 Safari/537.36"
+            ),
+            "Accept": "application/json",
+        }
+
+        async with httpx.AsyncClient(timeout=10, headers=headers) as client:
             response = await client.get(self.BASE_URL)
             response.raise_for_status()
-
             data = response.json()
 
         jobs: List[Job] = []
 
-        # First element is metadata → skip it
         for item in data[1:]:
             title = item.get("position")
             company = item.get("company")
